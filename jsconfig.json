@@ -8,6 +8,7 @@
       "#utils/*": ["utils/*"],
       "#router/*": ["router/*"],
       "#layouts/*": ["layouts/*"],
+      "#store/*": ["store/*"],
     }
   }
 }
