@@ -5,13 +5,7 @@ import FavoritesIcon from '#assets/icons/bookmark.svg?react';
 import WatchLaterIcon from '#assets/icons/time.svg?react';
 
 const FilmCard = ({
-    name,
-    year,
-    description,
-    actors,
-    type,
-    rating,
-    genres,
+    film,
     onClickAddFavorites,
     onClickAddWatchLater,
     onClickGenge,
@@ -37,26 +31,26 @@ const FilmCard = ({
             </Card.Header>
             <Card.Body>
                 <Card.Title className={styles.Title}>
-                    <div>{name}</div>
+                    <div className='text-start'>{film?.name}</div>
                     <div className="border border-dark p-1 rounded">
-                        {rating.toFixed(1)}
+                        {film?.rating.toFixed(1)}
                     </div>
                 </Card.Title>
                 <Card.Text className={styles.Description}>
-                    {description}
+                    {film?.description}
                 </Card.Text>
             </Card.Body>
             <ListGroup className="list-group-flush">
-                <ListGroup.Item>{type} ({year})</ListGroup.Item>
+                <ListGroup.Item>{film?.type} ({film?.year})</ListGroup.Item>
                 <ListGroup.Item className={styles.Actors}>
                     В ролях:&nbsp;
                     {
-                        actors?.map((actor) => actor.name).join(', ')
+                        film?.actors?.map((actor) => actor.name).join(', ')
                     }
                 </ListGroup.Item>
                 <ListGroup.Item className={styles.Genres}>
                     {
-                        genres?.map((genre, i) => <Badge
+                        film?.genres?.map((genre, i) => <Badge
                             key={i}
                             className={`me-2 ${styles.forAction}`}
                             bg="secondary"

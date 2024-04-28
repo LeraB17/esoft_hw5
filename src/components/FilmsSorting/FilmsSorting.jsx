@@ -1,16 +1,11 @@
 import React from 'react';
 import styles from './FilmsSorting.module.css';
-import { useDispatch, useSelector } from 'react-redux';
 import { sortByOptions } from '#utils/filterSortingOptions';
 import { Form } from 'react-bootstrap';
-import { setSorting } from '#store/filterSortingSlice';
 
-const FilmsSorting = () => {
-    const { sortBy } = useSelector((state) => state.filterSorting);
-    const dispatch = useDispatch();
-
+const FilmsSorting = ({ sort, setSort }) => {
     const onChangeSort = (e) => {
-        dispatch(setSorting(e.target.value));
+        setSort(e.target.value);
     }
 
     console.log('FilmsSorting')
@@ -18,7 +13,7 @@ const FilmsSorting = () => {
     return (
         <div className={styles.FilmsSorting}>
             <Form.Select
-                value={sortBy}
+                value={sort}
                 onChange={onChangeSort}
             >
                 {
