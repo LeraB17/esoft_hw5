@@ -2,13 +2,19 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import styles from './MainLayout.module.css';
 import Header from '#components/Header/Header';
+import SideBar from '#components/SideBar/SideBar';
 
 const MainLayout = () => {
     return (
         <>
             <Header />
             <div className={styles.Content}>
-                <Outlet />
+                <div className={styles.Outlet}>
+                    <Outlet />
+                </div>
+                <div>
+                    <SideBar />
+                </div>
             </div>
         </>
     );

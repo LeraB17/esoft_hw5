@@ -1,0 +1,9 @@
+.MainTop {
+  display: flex;
+  justify-content: space-between;
+}
+.SortFilter {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}

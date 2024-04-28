@@ -1,52 +1,52 @@
 import React, { useEffect } from 'react';
 import styles from './MainPage.module.css';
+import FilmsList from '#components/FilmsList/FilmsList';
+import FilmsSorting from '#components/FilmsSorting/FilmsSorting';
+import FilmsFilterType from '#components/FilmsFilterType/FilmsFilterType';
+import { useFetching } from '#hooks/useFetching';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchDataFailure, fetchDataStart, fetchDataSuccess } from '#store/filmsSlice';
 import { filmsData } from '#store/filmsData';
+import { fetchData, fetchSortedData } from '#store/filmsSlice';
 
 const MainPage = () => {
-    const { loading, data: films, error } = useSelector((state) => state.films)
+    const { data: films } = useSelector((state) => state.films)
+    const { sortBy } = useSelector((state) => state.filterSorting)
     const dispatch = useDispatch()
 
+    const [fetchFilms, isLoadingFilms, fetchError] = useFetching(async () => {
+        const data = filmsData;
+        dispatch(fetchData(data));
+    });
+
+    const [fetchSortedFilms, isLoadingSortedFilms, fetchSortedError] = useFetching(async () => {
+        dispatch(fetchSortedData(sortBy));
+    });
+
     useEffect(() => {
-        const timeFetch = 500;
-        const timeStartFetch = Date.now();
-
-        const fetchData = async () => {
-            try {
-                dispatch(fetchDataStart());
-                // имитация долгой загрузки
-                const timer = setTimeout(async () => {
-                    const data = filmsData;
-                    dispatch(fetchDataSuccess(data));
-
-                    if (Date.now() - timeStartFetch > timeFetch) {
-                        clearInterval(timer);
-                    }
-                }, timeFetch);
-            } catch (error) {
-                dispatch(fetchDataFailure(error))
-            }
-        }
-
-        fetchData();
+        fetchFilms();
     }, [])
 
-    if (loading) {
-        return <div>Loading...</div>
-    }
+    useEffect(() => {
+        fetchSortedFilms();
+    }, [sortBy])
 
-    if (error) {
-        return <div>error</div>
-    }
+    console.log('MainPage')
 
     return (
-        <div>
-            MainPage
-            {
-                films?.map((film) => <div key={film.id}>{film.name}</div>)
-            }
-        </div>
+        <>
+            <div className={`mb-2 ${styles.MainTop}`}>
+                <h3>Популярно сейчас</h3>
+                <div className={styles.SortFilter}>
+                    <FilmsSorting />
+                    <FilmsFilterType />
+                </div>
+            </div>
+            <FilmsList
+                films={films}
+                isLoading={isLoadingFilms || isLoadingSortedFilms}
+                error={fetchError || fetchSortedError}
+            />
+        </>
     );
 };
 

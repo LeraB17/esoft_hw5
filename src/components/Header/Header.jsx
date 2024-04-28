@@ -9,6 +9,9 @@ import SearchIcon from '#assets/icons/search.svg?react';
 import UserIcon from '#assets/icons/user.svg?react';
 
 const Header = () => {
+
+    console.log('Header')
+
     return (
         <Navbar fixed='top' bg="dark" data-bs-theme="dark" className="bg-body-tertiary justify-content-between">
             <Container>

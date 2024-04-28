@@ -9,6 +9,7 @@
       "#router/*": ["router/*"],
       "#layouts/*": ["layouts/*"],
       "#store/*": ["store/*"],
+      "#hooks/*": ["hooks/*"],
     }
   }
 }
