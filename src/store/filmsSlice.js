@@ -14,6 +14,6 @@ export const filmsSlice = createSlice({
   },
 });
 
-export const { fetchData, fetchSortedData } = filmsSlice.actions;
+export const { fetchData } = filmsSlice.actions;
 
 export default filmsSlice.reducer;

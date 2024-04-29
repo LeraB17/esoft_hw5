@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import styles from './FilmsList.module.css';
 import Loader from '#components/Loader/Loader';
 import FilmCard from '#components/FilmCard/FilmCard';
@@ -8,45 +8,43 @@ import { filmsData } from '#store/filmsData';
 import { fetchData } from '#store/filmsSlice';
 import FilmsSorting from '#components/FilmsSorting/FilmsSorting';
 import FilmsFilterType from '#components/FilmsFilterType/FilmsFilterType';
-import { typesOptions, sortByOptions } from '#utils/filterSortingOptions';
+import { filterByDescription, filterByGenres, filterByName, filterByType, sortByRating } from '#utils/dataFilterFunctions';
+import { resetFilters, setSort, setType } from '#store/filtersSlice';
 
 const FilmsList = ({ title }) => {
-    const [sort, setSort] = useState(sortByOptions.RATING_DOWN);
-    const [type, setType] = useState(typesOptions.ALL);
-
     const { data: films } = useSelector((state) => state.films);
+    const { sort, type, searchName, searchDescription, searchGenres } = useSelector((state) => state.filters);
     const dispatch = useDispatch();
 
     const [fetchFilms, isLoadingFilms, fetchError] = useFetching(async () => {
-        let data = [...filmsData];
+        let data = filmsData;
 
-        switch (type) {
-            case typesOptions.CARTOONS:
-            case typesOptions.MOVIE:
-            case typesOptions.SERIES:
-                data = data.filter((f) => f.type === type.toLowerCase());
-                break;
-            default:
-                break;
-        }
+        console.log('searchName', searchName)
 
-        switch (sort) {
-            case sortByOptions.RATING_UP:
-                data.sort((a, b) => a.rating - b.rating);
-                break;
-            case sortByOptions.RATING_DOWN:
-                data.sort((a, b) => b.rating - a.rating);
-                break;
-            default:
-                break;
+        if (searchName) {
+            data = filterByName(data, searchName);
         }
+        if (searchDescription) {
+            data = filterByDescription(data, searchDescription);
+        }
+        if (searchGenres) {
+            data = filterByGenres(data, searchGenres);
+        }
+        data = filterByType(data, type);
+        data = sortByRating(data, sort);
 
         dispatch(fetchData(data));
     });
 
     useEffect(() => {
         fetchFilms();
-    }, [sort, type])
+    }, [sort, type, searchName, searchDescription, searchGenres])
+
+    useEffect(() => {
+        return () => {
+            dispatch(resetFilters());
+        }
+    }, [])
 
     console.log('FilmsList')
 
@@ -65,25 +63,29 @@ const FilmsList = ({ title }) => {
                 <div className={styles.SortFilter}>
                     <FilmsSorting
                         sort={sort}
-                        setSort={setSort}
+                        setSort={(sortValue) => dispatch(setSort(sortValue))}
                     />
                     <FilmsFilterType
                         type={type}
-                        setType={setType}
+                        setType={(typeValue) => dispatch(setType(typeValue))}
                     />
                 </div>
             </div>
-            <div className={styles.FilmsList}>
-                {
-                    films?.map((film) => <FilmCard
-                        key={film.id}
-                        film={film}
-                        onClickAddFavorites={() => { }}
-                        onClickAddWatchLater={() => { }}
-                        onClickGenge={() => { }}
-                    />)
-                }
-            </div>
+            {
+                films?.length ?
+                    <div className={styles.FilmsList}>
+                        {
+                            films?.map((film) => <FilmCard
+                                key={film.id}
+                                film={film}
+                                onClickAddFavorites={() => { }}
+                                onClickAddWatchLater={() => { }}
+                                onClickGenge={() => { }}
+                            />)
+                        }
+                    </div>
+                    : <h6 className='mt-5'>По запросу ничего не найдено :(</h6>
+            }
         </>
     );
 };
