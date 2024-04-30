@@ -32,8 +32,6 @@ const Header = () => {
         event.preventDefault();
     };
 
-    console.log('Header')
-
     return (
         <Navbar fixed='top' bg="dark" data-bs-theme="dark" className="bg-body-tertiary justify-content-between">
             <Container>
@@ -46,7 +44,7 @@ const Header = () => {
 
                 <Stack direction="horizontal" gap={5}>
                     <Form>
-                        <InputGroup className="">
+                        <InputGroup>
                             <Form.Control
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}

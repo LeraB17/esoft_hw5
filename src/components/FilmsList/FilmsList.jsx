@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import styles from './FilmsList.module.css';
-import Loader from '#components/Loader/Loader';
+import Loader from '#components/UI/Loader/Loader';
 import FilmCard from '#components/FilmCard/FilmCard';
 import { useFetching } from '#hooks/useFetching';
 import { useDispatch, useSelector } from 'react-redux';
@@ -18,8 +18,6 @@ const FilmsList = ({ title }) => {
 
     const [fetchFilms, isLoadingFilms, fetchError] = useFetching(async () => {
         let data = filmsData;
-
-        console.log('searchName', searchName)
 
         if (searchName) {
             data = filterByName(data, searchName);
@@ -45,8 +43,6 @@ const FilmsList = ({ title }) => {
             dispatch(resetFilters());
         }
     }, [])
-
-    console.log('FilmsList')
 
     if (isLoadingFilms) {
         return <Loader />

@@ -8,8 +8,6 @@ const FilmsSorting = ({ sort, setSort }) => {
         setSort(e.target.value);
     }
 
-    console.log('FilmsSorting')
-
     return (
         <div className={styles.FilmsSorting}>
             <Form.Select

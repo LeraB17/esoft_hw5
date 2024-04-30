@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import styles from './SearchForm.module.css';
-import { Badge, Button, Form, FormGroup } from 'react-bootstrap';
+import { Badge, Button, Form } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
-import MultiSelect from '#components/MultiSelect/MultiSelect';
+import MultiSelect from '#components/UI/MultiSelect/MultiSelect';
 import { genresData } from '#store/genresData';
 import { setSearchDescription, setSearchGenres, setSearchName } from '#store/filtersSlice';
 import { sortByName } from '#utils/dataFilterFunctions';
+import Input from '#components/UI/Input/Input';
 
 const SearchForm = ({ startSearch, setStartSearch }) => {
     const [searchByName, setSearchByName] = useState('');
@@ -34,24 +35,22 @@ const SearchForm = ({ startSearch, setStartSearch }) => {
 
     return (
         <Form className={`border border-secondary rounded p-2 mb-3 ${styles.Form}`}>
-            <FormGroup className="w-100 mb-3 me-2">
-                <Form.Label className='text'>Название</Form.Label>
-                <Form.Control
-                    value={searchByName}
-                    onChange={(e) => setSearchByName(e.target.value)}
-                    type="text"
-                    placeholder="Введите название..."
-                />
-            </FormGroup>
-            <FormGroup className="w-100 mb-3 ms-2">
-                <Form.Label>Текст описания</Form.Label>
-                <Form.Control
-                    value={searchByDescription}
-                    onChange={(e) => setSearchByDescription(e.target.value)}
-                    type="text"
-                    placeholder="Введите слова из описания..."
-                />
-            </FormGroup>
+            <Input
+                className={"me-2"}
+                label={"Название"}
+                value={searchByName}
+                onChange={(e) => setSearchByName(e.target.value)}
+                type="text"
+                placeholder="Введите название..."
+            />
+            <Input
+                className={"ms-2"}
+                label={"Текст описания"}
+                value={searchByDescription}
+                onChange={(e) => setSearchByDescription(e.target.value)}
+                type="text"
+                placeholder="Введите слова из описания..."
+            />
 
             <MultiSelect
                 title={"Выберите жанры"}
