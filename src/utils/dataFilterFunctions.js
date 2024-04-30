@@ -57,3 +57,12 @@ export const filterByGenres = (data, selectedGenres) => {
     return selectedGenres.every((genre) => genreNames.includes(genre));
   });
 };
+
+export const getSearchString = (queryParams) => {
+  const filteredQueryParams = Object.entries(queryParams).filter(
+    ([key, value]) => value.length > 0
+  );
+  const searchParams = new URLSearchParams(filteredQueryParams);
+
+  return `?${searchParams.toString()}`;
+};

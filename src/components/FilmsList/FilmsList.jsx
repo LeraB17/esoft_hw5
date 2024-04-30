@@ -8,13 +8,16 @@ import { filmsData } from '#store/filmsData';
 import { fetchData } from '#store/filmsSlice';
 import FilmsSorting from '#components/FilmsSorting/FilmsSorting';
 import FilmsFilterType from '#components/FilmsFilterType/FilmsFilterType';
-import { filterByDescription, filterByGenres, filterByName, filterByType, sortByRating } from '#utils/dataFilterFunctions';
+import { filterByDescription, filterByGenres, filterByName, filterByType, getSearchString, sortByRating } from '#utils/dataFilterFunctions';
 import { resetFilters, setSort, setType } from '#store/filtersSlice';
+import { useNavigate } from 'react-router-dom';
+import { FILM_SEARCH_PAGE } from '#utils/urls';
 
 const FilmsList = ({ title }) => {
     const { data: films } = useSelector((state) => state.films);
     const { sort, type, searchName, searchDescription, searchGenres } = useSelector((state) => state.filters);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const [fetchFilms, isLoadingFilms, fetchError] = useFetching(async () => {
         let data = filmsData;
@@ -44,6 +47,12 @@ const FilmsList = ({ title }) => {
         }
     }, [])
 
+    const handlerClickGenre = (genre) => {
+        navigate(`${FILM_SEARCH_PAGE}${getSearchString({
+            genres: genre,
+        })}`);
+    }
+
     if (isLoadingFilms) {
         return <Loader />
     }
@@ -55,7 +64,11 @@ const FilmsList = ({ title }) => {
     return (
         <>
             <div className={`mb-2 ${styles.FilmsListTop}`}>
-                <h3>{title}</h3>
+                <div className='d-flex align-items-center'>
+                <h3>{title}:&nbsp;</h3>
+                <h4>найдено&nbsp;{films?.length}</h4>
+                </div>
+                
                 <div className={styles.SortFilter}>
                     <FilmsSorting
                         sort={sort}
@@ -76,7 +89,7 @@ const FilmsList = ({ title }) => {
                                 film={film}
                                 onClickAddFavorites={() => { }}
                                 onClickAddWatchLater={() => { }}
-                                onClickGenge={() => { }}
+                                onClickGenge={(genre) => handlerClickGenre(genre)}
                             />)
                         }
                     </div>

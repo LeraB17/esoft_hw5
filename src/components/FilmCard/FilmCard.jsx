@@ -54,7 +54,7 @@ const FilmCard = ({
                             key={i}
                             className={`me-2 ${styles.forAction}`}
                             bg="secondary"
-                            onClick={onClickGenge}
+                            onClick={() => onClickGenge(genre.name)}
                         >
                             {genre.name}
                         </Badge>)
