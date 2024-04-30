@@ -66,3 +66,18 @@ export const getSearchString = (queryParams) => {
 
   return `?${searchParams.toString()}`;
 };
+
+export const getSimilarFilms = (films, selectedFilm) => {
+  const selectedGenres = selectedFilm?.genres?.map((item) => item.name);
+  const minMatches = selectedGenres?.length > 1 ? 2 : 1;
+
+  return films
+    .filter((film) => film.name !== selectedFilm.name)
+    .filter((film) => {
+      const genreNames = film.genres.map((genre) => genre.name);
+      const matchingGenres = selectedGenres?.filter((genre) =>
+        genreNames.includes(genre)
+      );
+      return matchingGenres?.length >= minMatches;
+    });
+};

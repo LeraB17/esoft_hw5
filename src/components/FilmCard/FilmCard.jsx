@@ -3,6 +3,8 @@ import styles from './FilmCard.module.css';
 import { Badge, Card, ListGroup } from 'react-bootstrap';
 import FavoritesIcon from '#assets/icons/bookmark.svg?react';
 import WatchLaterIcon from '#assets/icons/time.svg?react';
+import { Link } from 'react-router-dom';
+import { FILM_PAGE } from '#utils/urls';
 
 const FilmCard = ({
     film,
@@ -31,7 +33,7 @@ const FilmCard = ({
             </Card.Header>
             <Card.Body>
                 <Card.Title className={styles.Title}>
-                    <div className='text-start'>{film?.name}</div>
+                    <Link to={FILM_PAGE.replace(':id', film?.id)} className='text-dark text-start'>{film?.name}</Link>
                     <div className="border border-dark p-1 rounded">
                         {film?.rating.toFixed(1)}
                     </div>

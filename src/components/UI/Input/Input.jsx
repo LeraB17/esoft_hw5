@@ -3,7 +3,7 @@ import { Form, FormGroup } from 'react-bootstrap';
 
 const Input = ({ className, label, value, onChange, ...props }) => {
     return (
-        <FormGroup className={`w-100 mb-3 ${className}`}>
+        <FormGroup className={`w-100 ${className}`}>
             {
                 label && <Form.Label className='text'>
                     {label}

@@ -65,7 +65,6 @@ const SearchForm = ({ startSearch, setStartSearch }) => {
     return (
         <Form className={`border border-secondary rounded p-2 mb-3 ${styles.Form}`}>
             <Input
-                className={"me-2"}
                 label={"Название"}
                 value={searchByName}
                 onChange={(e) => setSearchByName(e.target.value)}
@@ -73,7 +72,6 @@ const SearchForm = ({ startSearch, setStartSearch }) => {
                 placeholder="Введите название..."
             />
             <Input
-                className={"ms-2"}
                 label={"Текст описания"}
                 value={searchByDescription}
                 onChange={(e) => setSearchByDescription(e.target.value)}
