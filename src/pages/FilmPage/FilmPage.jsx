@@ -1,24 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import styles from './FilmPage.module.css';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useFetching } from '#hooks/useFetching';
 import { filmsData } from '#store/filmsData';
 import Loader from '#components/UI/Loader/Loader';
-import { Card, ListGroup } from 'react-bootstrap';
-import FavoritesIcon from '#assets/icons/bookmark.svg?react';
-import WatchLaterIcon from '#assets/icons/time.svg?react';
-import { getSimilarFilms } from '#utils/dataFilterFunctions';
-import { FILM_PAGE } from '#utils/urls';
+import { getDateNowToString, getSimilarFilms } from '#utils/dataFilterFunctions';
+import CommentForm from '#components/CommentForm/CommentForm';
+import CommentsList from '#components/CommentsList/CommentsList';
+import FilmInfo from '#components/FilmInfo/FilmInfo';
+import { useDispatch, useSelector } from 'react-redux';
+import { addComment } from '#store/commentsSlice';
 
 const FilmPage = () => {
     const [currentFilm, setCurrentFilm] = useState({})
     const params = useParams();
+    const { userId } = useSelector((state) => state.user);
+    const { comments } = useSelector((state) => state.comments);
+    const dispatch = useDispatch();
 
     const [fetchFilm, isLoadingFilm, fetchError] = useFetching(async () => {
         const data = filmsData.filter((film) => film.id === Number(params.id))[0];
+        const dataComments = comments.filter((comment) => comment.filmId === data.id);
+
         const dataWithSimilar = {
             ...data,
             similar: getSimilarFilms(filmsData, data),
+            comments: dataComments,
         }
 
         setCurrentFilm(dataWithSimilar);
@@ -27,6 +34,24 @@ const FilmPage = () => {
     useEffect(() => {
         fetchFilm();
     }, [params])
+
+    const handlerAddComment = (value) => {
+        if (value) {
+            const newComment = {
+                id: comments?.length,
+                filmId: currentFilm?.id,
+                user: userId,
+                text: value,
+                date: getDateNowToString(),
+            }
+            setCurrentFilm((prev) => ({
+                ...prev,
+                comments: [newComment, ...prev.comments],
+            }));
+
+            dispatch(addComment(newComment));
+        }
+    }
 
     const handlerAddFavorite = () => {
 
@@ -45,68 +70,19 @@ const FilmPage = () => {
     }
 
     return (
-        <Card>
-            <Card.Header className='d-flex justify-content-between align-items-center fw-bolder fs-5'>
-                <div>
-                    {currentFilm?.name}
-                </div>
-                <div>
-                    <FavoritesIcon
-                        className={`me-2 ${styles.forAction}`}
-                        width={30}
-                        height={30}
-                        stroke={"#1e1e1e"}
-                        fill={"none"}
-                        onClick={() => handlerAddFavorite()}
-                    />
-                    <WatchLaterIcon
-                        className={styles.forAction}
-                        width={30}
-                        height={30}
-                        fill={"#1e1e1e"}
-                        onClick={() => handlerWatchLater()}
-                    />
-                </div>
-            </Card.Header>
-            <Card.Body className={styles.Content}>
-                <ListGroup className={`list-group-flush border ${styles.Text}`}>
-                    <ListGroup.Item className='fw-bolder'>Описание:</ListGroup.Item>
-                    <ListGroup.Item>{currentFilm?.description}</ListGroup.Item>
-                </ListGroup>
-                <ListGroup className={`list-group-flush border ${styles.Text}`}>
-                    <ListGroup.Item>
-                        <span>Рейтинг:&nbsp;</span>
-                        {currentFilm?.rating?.toFixed(1)}
-                    </ListGroup.Item>
-                    <ListGroup.Item>
-                        <span>Тип:&nbsp;</span>
-                        {currentFilm?.type}</ListGroup.Item>
-                    <ListGroup.Item>
-                        <span>Год(ы) выхода:&nbsp;</span>
-                        {currentFilm?.year}
-                    </ListGroup.Item>
-                    <ListGroup.Item>
-                        <span>Жанры:&nbsp;</span>
-                        {currentFilm?.genres?.map((item) => item.name).join(', ')}
-                    </ListGroup.Item>
-                    <ListGroup.Item>
-                        <span>В ролях:&nbsp;</span>
-                        {currentFilm?.actors?.map((item) => item.name).join(', ')}
-                        &nbsp;и др.
-                    </ListGroup.Item>
-                </ListGroup>
-                <ListGroup className='list-group-flush border'>
-                    <ListGroup.Item className='fw-bolder'>Похожее по жанрам:</ListGroup.Item>
-                    {
-                        currentFilm?.similar?.map((film) => <Link key={film.id} to={FILM_PAGE.replace(':id', film.id)}>
-                            <ListGroup.Item>
-                                {film.name}
-                            </ListGroup.Item>
-                        </Link>)
-                    }
-                </ListGroup>
-            </Card.Body>
-        </Card>
+        <div className={styles.FilmPage}>
+            <FilmInfo
+                film={currentFilm}
+                onClickAddFavorite={handlerAddFavorite}
+                onClickWatchLater={handlerWatchLater}
+            />
+            <CommentForm
+                onClickSubmit={(value) => handlerAddComment(value)}
+            />
+            <CommentsList
+                comments={currentFilm?.comments}
+            />
+        </div>
     );
 };
 

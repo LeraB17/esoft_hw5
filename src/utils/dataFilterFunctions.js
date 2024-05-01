@@ -81,3 +81,43 @@ export const getSimilarFilms = (films, selectedFilm) => {
       return matchingGenres?.length >= minMatches;
     });
 };
+
+export const getDateNowToString = () => {
+  const now = new Date();
+
+  const day = now.getDate();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+
+  const addStartZero = (value) => (value < 10 ? `0${value}` : value);
+
+  const formattedDate =
+    `${addStartZero(day)}-${addStartZero(month)}-${year}` +
+    ` ` +
+    `${addStartZero(hours)}:${addStartZero(minutes)}:${addStartZero(seconds)}`;
+
+  return formattedDate;
+};
+
+const parseFormattedDate = (dateStr) => {
+  const [datePart, timePart] = dateStr.split(" ");
+
+  const [day, month, year] = datePart.split("-").map(Number);
+  const [hours, minutes, seconds] = timePart.split(":").map(Number);
+
+  return new Date(year, month - 1, day, hours, minutes, seconds);
+};
+
+export const sortByDate = (data) => {
+  if (!data) return [];
+  return [...data].sort((a, b) => {
+    const dateA = parseFormattedDate(a.date);
+    const dateB = parseFormattedDate(b.date);
+
+    return dateB - dateA;
+  });
+};

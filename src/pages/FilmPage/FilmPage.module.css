@@ -1,13 +1,5 @@
-.Content {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-}
-.Text {
-    text-align: justify;
-}
-.Text span {
-    font-weight: bolder;
-}
-.forAction {
-    cursor: pointer;
+.FilmPage {
+  display: grid;
+  grid-template-rows: repeat(3, auto);
+  grid-gap: 20px;
 }
