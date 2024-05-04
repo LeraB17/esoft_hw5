@@ -6,7 +6,7 @@ import WatchLaterIcon from '#assets/icons/time.svg?react';
 import { FILM_PAGE } from '#utils/urls';
 import { Link } from 'react-router-dom';
 
-const FilmInfo = ({ film, onClickAddFavorite, onClickWatchLater }) => {
+const FilmInfo = ({ film, isFavorite, isWatchLater, onClickAddFavorite, onClickWatchLater }) => {
     return (
         <Card>
             <Card.Header className='d-flex justify-content-between align-items-center fw-bolder fs-4'>
@@ -18,16 +18,16 @@ const FilmInfo = ({ film, onClickAddFavorite, onClickWatchLater }) => {
                         className={`me-2 ${styles.forAction}`}
                         width={30}
                         height={30}
-                        stroke={"#1e1e1e"}
-                        fill={"none"}
-                        onClick={() => onClickAddFavorite()}
+                        stroke={isFavorite ? "#999999" : "#1e1e1e"}
+                        fill={isFavorite ? "#999999" : "none"}
+                        onClick={() => onClickAddFavorite(film?.id)}
                     />
                     <WatchLaterIcon
                         className={styles.forAction}
                         width={30}
                         height={30}
-                        fill={"#1e1e1e"}
-                        onClick={() => onClickWatchLater()}
+                        fill={isWatchLater ? "#999999" : "#1e1e1e"}
+                        onClick={() => onClickWatchLater(film?.id)}
                     />
                 </div>
             </Card.Header>

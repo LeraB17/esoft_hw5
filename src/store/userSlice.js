@@ -3,8 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   userId: null,
   userName: "Анонимный пользователь",
-  favoriteFilms: null,
-  watchLaterFilms: null,
+  favoriteFilms: [],
+  watchLaterFilms: [],
 };
 
 export const userSlice = createSlice({
@@ -18,24 +18,20 @@ export const userSlice = createSlice({
       state.watchLaterFilms = action.payload.watchLaterFilms;
     },
     addFavoriteFilm(state, action) {
-      if (state.favoriteFilms) {
-        state.favoriteFilms.push(action.payload);
-      }
+      state.favoriteFilms.push(action.payload);
     },
     addWatchLaterFilm(state, action) {
-      if (state.watchLaterFilms) {
-        state.watchLaterFilms.push(action.payload);
-      }
+      state.watchLaterFilms.push(action.payload);
     },
     removeFavoriteFilm(state, action) {
-      if (state.favoriteFilms) {
-        state.favoriteFilms.filter((film) => film.id !== action.payload);
-      }
+      state.favoriteFilms = state.favoriteFilms.filter(
+        (film) => film.id !== action.payload
+      );
     },
     removeWatchLaterFilm(state, action) {
-      if (state.watchLaterFilms) {
-        state.watchLaterFilms.filter((film) => film.id !== action.payload);
-      }
+      state.watchLaterFilms = state.watchLaterFilms.filter(
+        (film) => film.id !== action.payload
+      );
     },
   },
 });

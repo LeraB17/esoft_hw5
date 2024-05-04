@@ -8,6 +8,8 @@ import { FILM_PAGE } from '#utils/urls';
 
 const FilmCard = ({
     film,
+    isFavorite,
+    isWatchLater,
     onClickAddFavorites,
     onClickAddWatchLater,
     onClickGenge,
@@ -19,16 +21,16 @@ const FilmCard = ({
                     className={styles.forAction}
                     width={30}
                     height={30}
-                    stroke={"#1e1e1e"}
-                    fill={"none"}
-                    onClick={onClickAddFavorites}
+                    stroke={isFavorite ? "#999999" : "#1e1e1e"}
+                    fill={isFavorite ? "#999999" : "none"}
+                    onClick={() => onClickAddFavorites(film?.id)}
                 />
                 <WatchLaterIcon
                     className={styles.forAction}
                     width={30}
                     height={30}
-                    fill={"#1e1e1e"}
-                    onClick={onClickAddWatchLater}
+                    fill={isWatchLater ? "#999999" : "#1e1e1e"}
+                    onClick={() => onClickAddWatchLater(film?.id)}
                 />
             </Card.Header>
             <Card.Body>
