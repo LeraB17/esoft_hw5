@@ -17,6 +17,7 @@ export default defineConfig({
       "#layouts": path.resolve(__dirname, "src/layouts"),
       "#store": path.resolve(__dirname, "src/store"),
       "#hooks": path.resolve(__dirname, "src/hooks"),
+      "#interfaces": path.resolve(__dirname, "src/interfaces"),
     },
   },
 });
