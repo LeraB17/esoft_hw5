@@ -2,83 +2,91 @@ import React, { FC, useEffect } from "react";
 import styles from "./FilmsList.module.css";
 import Loader from "#components/UI/Loader/Loader";
 import FilmCard from "#components/FilmCard/FilmCard";
-import { useFetching } from "#hooks/useFetching";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchData } from "#store/filmsSlice";
 import FilmsSorting from "#components/FilmsSorting/FilmsSorting";
 import FilmsFilterType from "#components/FilmsFilterType/FilmsFilterType";
 import {
     filterByDescription,
     filterByGenres,
     filterByName,
-    filterByType,
+    getPageItems,
     getSearchString,
-    sortByRating,
 } from "#utils/dataFilterFunctions";
-import { resetFilters, setSort, setType } from "#store/filtersSlice";
+import { resetFilters, setPage, setSort, setType } from "#store/filtersSlice";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FILM_SEARCH_PAGE, MAIN_PAGE } from "#utils/urls";
-import { addFavoriteFilm, addWatchLaterFilm, removeFavoriteFilm, removeWatchLaterFilm } from "#store/userSlice";
 import { IFilmsListProps } from "./IFilmsListProps";
 import { IFilm } from "#interfaces/IFilm";
+import { filmsAPI } from "#services/FilmsService";
+import { sortByOptions, typesOptions } from "#utils/filterSortingOptions";
+import { useAppDispatch, useAppSelector } from "#hooks/redux";
+import { userAPI } from "#services/UserService";
+import PaginationBlock from "#components/PaginationBlock/PaginationBlock";
 
 const FilmsList: FC<IFilmsListProps> = ({ title }) => {
-    const { data: films } = useSelector((state) => state.films);
-    const { sort, type, searchName, searchDescription, searchGenres } = useSelector((state) => state.filters);
-    const { favoriteFilms, watchLaterFilms } = useSelector((state) => state.user);
-    const dispatch = useDispatch();
+    const { sort, type, searchName, searchDescription, searchGenres, page, limit } = useAppSelector(
+        (state) => state.filters
+    );
+    const dispatch = useAppDispatch();
+
+    const { data: favoriteFilms, error: errorF, isLoading: isLoadingF } = userAPI.useFetchFavoritesFilmsQuery();
+    const { data: watchLaterFilms, error: errorW, isLoading: isLoadingW } = userAPI.useFetchWatchLaterFilmsQuery();
+    const [createFavoriteFilm, {}] = userAPI.useCreateFavoriteFilmMutation();
+    const [createWatchLaterFilm, {}] = userAPI.useCreateWatchLaterFilmMutation();
+    const [deleteFavoriteFilm, {}] = userAPI.useDeleteFavoriteFilmMutation();
+    const [deleteWatchLaterFilm, {}] = userAPI.useDeleteWatchLaterFilmMutation();
+
+    const {
+        data: films,
+        error: fetchError,
+        isLoading: isLoadingFilms,
+        refetch,
+    } = filmsAPI.useFetchFilmsQuery({
+        sortRating: sort === sortByOptions.RATING_DOWN ? -1 : 1,
+        type: type === typesOptions.ALL ? "" : type.toLowerCase(),
+    });
+
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [fetchFilms, isLoadingFilms, fetchError] = useFetching();
+    // фильтрация по названию, описанию и жанрам (потому что json-server не умеет такое)
+    const filterFilms = () => {
+        let data = films;
 
-    const loadFilms = async (controller: AbortController) => {
-        const responce = await fetch("https://raw.githubusercontent.com/LeraB17/esoft_hw5/data-branch/films.json", {
-            signal: controller.signal,
-        });
-        let data: IFilm[] = await responce.json();
+        if (data) {
+            // типа самые популярные (по рейтингу)
+            if (location.pathname === MAIN_PAGE) {
+                return data.slice(0, 6);
+            }
 
-        // первые 6 типа самые популярные
-        if (location.pathname === MAIN_PAGE) {
-            data = data.slice(0, 6);
+            if (searchName) {
+                data = filterByName(data, searchName);
+            }
+            if (searchDescription) {
+                data = filterByDescription(data, searchDescription);
+            }
+            if (searchGenres) {
+                data = filterByGenres(data, searchGenres);
+            }
         }
-
-        if (searchName) {
-            data = filterByName(data, searchName);
-        }
-        if (searchDescription) {
-            data = filterByDescription(data, searchDescription);
-        }
-        if (searchGenres) {
-            data = filterByGenres(data, searchGenres);
-        }
-        data = filterByType(data, type);
-        data = sortByRating(data, sort);
-
-        dispatch(fetchData(data));
+        return data;
     };
 
-    useEffect(() => {
-        let abortFetch: () => void;
-        fetchFilms(loadFilms).then((abort) => {
-            abortFetch = abort;
-        });
-
-        return () => {
-            if (abortFetch) {
-                abortFetch();
-            }
-        };
-    }, [sort, type, searchName, searchDescription, searchGenres]);
+    const filteredFilms = filterFilms();
+    const pageItems = getPageItems(filteredFilms, limit);
 
     useEffect(() => {
-        // const controller = new AbortController();
+        refetch();
+    }, [sort, type, refetch, page]);
 
+    useEffect(() => {
         return () => {
             dispatch(resetFilters());
-            // controller.abort();
         };
     }, []);
+
+    useEffect(() => {
+        dispatch(setPage(0));
+    }, [sort, type, searchName, searchDescription, searchGenres]);
 
     const handlerClickGenre = (genre: string) => {
         navigate(
@@ -89,41 +97,41 @@ const FilmsList: FC<IFilmsListProps> = ({ title }) => {
     };
 
     const checkIsFavorite = (filmId: number) => {
-        return favoriteFilms.find((film: IFilm) => film.id === filmId);
+        return favoriteFilms?.find((film: IFilm) => film.id === filmId) ? true : false;
     };
 
     const checkIsWatchLater = (filmId: number) => {
-        return watchLaterFilms.find((film: IFilm) => film.id === filmId);
+        return watchLaterFilms?.find((film: IFilm) => film.id === filmId) ? true : false;
     };
 
-    const handlerAddFavorite = (filmId: number) => {
-        const film = films.find((film: IFilm) => film.id === filmId);
+    const handlerAddFavorite = async (filmId: number) => {
+        const film = films?.find((film: IFilm) => film.id === filmId);
         if (film) {
             if (checkIsFavorite(filmId)) {
-                dispatch(removeFavoriteFilm(film.id));
+                await deleteFavoriteFilm(film);
             } else {
-                dispatch(addFavoriteFilm(film));
+                await createFavoriteFilm(film);
             }
         }
     };
 
-    const handlerWatchLater = (filmId: number) => {
-        const film = films.find((film: IFilm) => film.id === filmId);
+    const handlerWatchLater = async (filmId: number) => {
+        const film = films?.find((film: IFilm) => film.id === filmId);
         if (film) {
             if (checkIsWatchLater(filmId)) {
-                dispatch(removeWatchLaterFilm(film.id));
+                await deleteWatchLaterFilm(film);
             } else {
-                dispatch(addWatchLaterFilm(film));
+                await createWatchLaterFilm(film);
             }
         }
     };
 
-    if (isLoadingFilms) {
+    if (isLoadingFilms || isLoadingF || isLoadingW) {
         return <Loader />;
     }
 
-    if (fetchError) {
-        return <div>Не удалось загрузить фильмы :( {fetchError}</div>;
+    if (fetchError || errorF || errorW) {
+        return <div>Не удалось загрузить фильмы :(</div>;
     }
 
     return (
@@ -131,7 +139,7 @@ const FilmsList: FC<IFilmsListProps> = ({ title }) => {
             <div className={`mb-2 ${styles.FilmsListTop}`}>
                 <div className="d-flex align-items-center">
                     <h3>{title}:&nbsp;</h3>
-                    <h4>найдено&nbsp;{films?.length}</h4>
+                    <h4>найдено&nbsp;{filteredFilms?.length}</h4>
                 </div>
 
                 <div className={styles.SortFilter}>
@@ -145,9 +153,9 @@ const FilmsList: FC<IFilmsListProps> = ({ title }) => {
                     />
                 </div>
             </div>
-            {films?.length ? (
+            {filteredFilms?.length ? (
                 <div className={styles.FilmsList}>
-                    {films?.map((film: IFilm) => (
+                    {filteredFilms?.slice(page * limit, (page + 1) * limit).map((film: IFilm) => (
                         <FilmCard
                             key={film.id}
                             film={film}
@@ -162,6 +170,14 @@ const FilmsList: FC<IFilmsListProps> = ({ title }) => {
             ) : (
                 <h6 className="mt-5">По запросу ничего не найдено :(</h6>
             )}
+            {filteredFilms?.length && filteredFilms?.length > limit ? (
+                <PaginationBlock
+                    className="mt-3"
+                    items={pageItems}
+                    active={page}
+                    setActive={(pg) => dispatch(setPage(pg))}
+                />
+            ) : null}
         </>
     );
 };

@@ -12,72 +12,96 @@ import { useDebounce } from "#hooks/useDebounce";
 import { setSearchName } from "#store/filtersSlice";
 
 const Header: FC = () => {
-  const [search, setSearch] = useState<string>("");
-  const debouncedValue = useDebounce(search, 1000);
-  const dispatch = useDispatch();
-  const location = useLocation();
+    const [search, setSearch] = useState<string>("");
+    const debouncedValue = useDebounce(search, 1000);
+    const dispatch = useDispatch();
+    const location = useLocation();
 
-  useEffect(() => {
-    dispatch(setSearchName(debouncedValue));
-  }, [debouncedValue]);
+    useEffect(() => {
+        dispatch(setSearchName(debouncedValue));
+    }, [debouncedValue]);
 
-  useEffect(() => {
-    setSearch("");
-  }, [location.pathname]);
+    useEffect(() => {
+        setSearch("");
+    }, [location.pathname]);
 
-  const handleAction = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.type === "keydown" && event.key !== "Enter") {
-      return;
-    }
-    event.preventDefault();
-  };
+    const handleAction = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.type === "keydown" && event.key !== "Enter") {
+            return;
+        }
+        event.preventDefault();
+    };
 
-  const handlerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(event.target.value);
-  };
+    const handlerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(event.target.value);
+    };
 
-  return (
-    <Navbar
-      fixed="top"
-      bg="dark"
-      data-bs-theme="dark"
-      className="bg-body-tertiary justify-content-between"
-    >
-      <Container>
-        <Navbar.Brand>
-          <Link to={MAIN_PAGE} className={styles.HeaderLink}>
-            <FilmIcon width={50} height={50} fill={"#aeaeae"} />
-            <div>Films Searcher</div>
-          </Link>
-        </Navbar.Brand>
+    return (
+        <Navbar
+            fixed="top"
+            bg="dark"
+            data-bs-theme="dark"
+            className="bg-body-tertiary justify-content-between"
+        >
+            <Container>
+                <Navbar.Brand>
+                    <Link
+                        to={MAIN_PAGE}
+                        className={styles.HeaderLink}
+                    >
+                        <FilmIcon
+                            width={50}
+                            height={50}
+                            fill={"#aeaeae"}
+                        />
+                        <div>Films Searcher</div>
+                    </Link>
+                </Navbar.Brand>
 
-        <Stack direction="horizontal" gap={5}>
-          <Form>
-            <InputGroup>
-              <Form.Control
-                value={search}
-                onChange={handlerChange}
-                onKeyDown={handleAction}
-                placeholder="Поиск..."
-              />
-              <InputGroup.Text>
-                <Link to={FILM_SEARCH_PAGE}>
-                  <SettingsIcon width={30} height={30} fill={"#aeaeae"} />
-                </Link>
-              </InputGroup.Text>
-              <InputGroup.Text>
-                <SearchIcon width={30} height={30} stroke={"#aeaeae"} />
-              </InputGroup.Text>
-            </InputGroup>
-          </Form>
+                <Stack
+                    direction="horizontal"
+                    gap={5}
+                >
+                    <Form>
+                        <InputGroup>
+                            <Form.Control
+                                value={search}
+                                onChange={handlerChange}
+                                onKeyDown={handleAction}
+                                placeholder="Поиск..."
+                            />
+                            <InputGroup.Text>
+                                <Link to={FILM_SEARCH_PAGE}>
+                                    <SettingsIcon
+                                        width={30}
+                                        height={30}
+                                        fill={"#aeaeae"}
+                                    />
+                                </Link>
+                            </InputGroup.Text>
+                            <InputGroup.Text>
+                                <Link to={FILM_SEARCH_PAGE}>
+                                    <SearchIcon
+                                        width={30}
+                                        height={30}
+                                        stroke={"#aeaeae"}
+                                    />
+                                </Link>
+                            </InputGroup.Text>
+                        </InputGroup>
+                    </Form>
 
-          <div>
-            <UserIcon width={40} height={40} stroke={"#aeaeae"} />
-          </div>
-        </Stack>
-      </Container>
-    </Navbar>
-  );
+                    <div>
+                        <UserIcon
+                            width={40}
+                            height={40}
+                            stroke={"#aeaeae"}
+                        />
+                    </div>
+                </Stack>
+            </Container>
+        </Navbar>
+    );
 };
 
 export default Header;

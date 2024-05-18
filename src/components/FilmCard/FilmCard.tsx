@@ -42,7 +42,7 @@ const FilmCard: FC<IFilmCardProps> = ({
                     >
                         {film?.name}
                     </Link>
-                    <div className="border border-dark p-1 rounded">{film?.rating.toFixed(1)}</div>
+                    <div className="border border-dark p-1 rounded">{film?.rating?.toFixed(1)}</div>
                 </Card.Title>
                 <Card.Text className={styles.Description}>{film?.description}</Card.Text>
             </Card.Body>

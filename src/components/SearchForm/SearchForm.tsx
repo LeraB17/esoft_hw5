@@ -3,13 +3,13 @@ import styles from "./SearchForm.module.css";
 import { Badge, Button, Form } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import MultiSelect from "#components/UI/MultiSelect/MultiSelect";
-import { genresData } from "#store/genresData";
 import { setSearchDescription, setSearchGenres, setSearchName } from "#store/filtersSlice";
 import Input from "#components/UI/Input/Input";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getSearchString } from "#utils/dataFilterFunctions";
 import { ISearchFormProps } from "./ISearchFormProps";
 import { SelectedOption } from "#components/UI/MultiSelect/IMultiSelectProps";
+import { filmsAPI } from "#services/FilmsService";
 
 const SearchForm: FC<ISearchFormProps> = ({ startSearch, setStartSearch }) => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -20,11 +20,16 @@ const SearchForm: FC<ISearchFormProps> = ({ startSearch, setStartSearch }) => {
     const [searchByDescription, setSearchByDescription] = useState<string>(searchParams.get("description") || "");
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
 
+    const { data: genresData } = filmsAPI.useFetchGenresQuery();
+
     const genresOptions = useMemo(() => {
-        const genreNames = genresData?.map((genre) => genre.name);
-        return genreNames.sort((a, b) => {
-            return a.toLowerCase().localeCompare(b.toLowerCase());
-        });
+        if (genresData) {
+            const genreNames = genresData?.map((genre) => genre.name);
+            return genreNames?.sort((a, b) => {
+                return a.toLowerCase().localeCompare(b.toLowerCase());
+            });
+        }
+        return [];
     }, [genresData]);
 
     useEffect(() => {

@@ -1,0 +1,14 @@
+.Page {
+    cursor: pointer;
+    padding: 10px 20px;
+}
+.Page:first-child {
+    border-radius: 10px 0 0 10px;
+}
+.Page:last-child {
+    border-radius: 0 10px 10px 0;
+}
+.PageActive {
+    background-color: grey;
+    color: #ffffff;
+}

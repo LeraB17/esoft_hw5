@@ -118,3 +118,12 @@ export const sortByDate = (data: IComment[]): IComment[] => {
         return dateB.getTime() - dateA.getTime();
     });
 };
+
+export const getPageItems = (films: IFilm[] | undefined, limit: number): number[] => {
+    if (films) {
+        const totalPages = Math.ceil(films?.length / limit);
+        const pages = Array.from({ length: totalPages }, (v, i) => i);
+        return pages;
+    }
+    return [];
+};

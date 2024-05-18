@@ -1,7 +1,7 @@
-import { IFilm } from "#interfaces/IFilm";
+import { IFilmPage } from "#interfaces/IFilm";
 
 export interface IFilmInfoProps {
-    film: IFilm;
+    film: IFilmPage;
     isFavorite: boolean;
     isWatchLater: boolean;
     onClickAddFavorite: (filmId: number) => void;

@@ -1,135 +1,108 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useMemo, useState } from "react";
 import styles from "./FilmPage.module.css";
 import { useParams } from "react-router-dom";
-import { useFetching } from "#hooks/useFetching";
 import Loader from "#components/UI/Loader/Loader";
 import { getDateNowToString, getSimilarFilms } from "#utils/dataFilterFunctions";
 import CommentForm from "#components/CommentForm/CommentForm";
 import CommentsList from "#components/CommentsList/CommentsList";
 import FilmInfo from "#components/FilmInfo/FilmInfo";
-import { useDispatch, useSelector } from "react-redux";
-import { addComment } from "#store/commentsSlice";
-import { addFavoriteFilm, addWatchLaterFilm, removeFavoriteFilm, removeWatchLaterFilm } from "#store/userSlice";
-import { fetchData } from "#store/filmsSlice";
 import { IFilm, IFilmPage } from "#interfaces/IFilm";
 import { IComment } from "#interfaces/IComment";
-
-const defaultFilm: IFilmPage = {
-    id: 0,
-    name: "",
-    year: "",
-    description: "",
-    actors: [],
-    type: "фильм",
-    rating: 0,
-    genres: [],
-    similar: [],
-    comments: [],
-};
+import { useAppSelector } from "#hooks/redux";
+import { filmsAPI } from "#services/FilmsService";
+import { commentsAPI } from "#services/ComentsService";
+import { userAPI } from "#services/UserService";
 
 const FilmPage: FC = () => {
-    const [currentFilm, setCurrentFilm] = useState<IFilmPage>(defaultFilm);
     const params = useParams();
-    const { userId } = useSelector((state) => state.user);
-    const { comments } = useSelector((state) => state.comments);
-    const { data: films } = useSelector((state) => state.films);
-    const { favoriteFilms, watchLaterFilms } = useSelector((state) => state.user);
-    const dispatch = useDispatch();
+    const [currentFilm, setCurrentFilm] = useState<IFilmPage | undefined>(undefined);
 
-    const [fetchFilm, isLoadingFilm, fetchError] = useFetching();
+    const { userId } = useAppSelector((state) => state.user);
 
-    const loadFilm = async (controller: AbortController) => {
-        const responce = await fetch("https://raw.githubusercontent.com/LeraB17/esoft_hw5/data-branch/films.json", {
-            signal: controller.signal,
-        });
-        let data: IFilm[] = await responce.json();
+    const { data: films } = filmsAPI.useFetchFilmsQuery({});
+    const { data: film, error: fetchError, isLoading: isLoadingFilm } = filmsAPI.useFetchFilmQuery(Number(params.id));
+    const { data: comments } = commentsAPI.useFetchFilmCommentsQuery({ filmId: Number(params.id) });
+    const [createComment, {}] = commentsAPI.useCreateCommentMutation();
 
-        dispatch(fetchData(data));
+    const { data: favoriteFilms, error: errorF, isLoading: isLoadingF } = userAPI.useFetchFavoritesFilmsQuery();
+    const { data: watchLaterFilms, error: errorW, isLoading: isLoadingW } = userAPI.useFetchWatchLaterFilmsQuery();
+    const [createFavoriteFilm, {}] = userAPI.useCreateFavoriteFilmMutation();
+    const [createWatchLaterFilm, {}] = userAPI.useCreateWatchLaterFilmMutation();
+    const [deleteFavoriteFilm, {}] = userAPI.useDeleteFavoriteFilmMutation();
+    const [deleteWatchLaterFilm, {}] = userAPI.useDeleteWatchLaterFilmMutation();
 
-        const dataFilm = data.find((film: IFilm) => film.id === Number(params.id));
-
-        if (!dataFilm) {
-            throw new Error("несуществующий id");
+    const similarFilms = useMemo(() => {
+        if (films && film) {
+            return getSimilarFilms(films, film);
         }
+        return [];
+    }, [films, film]);
 
-        const dataComments = comments.filter((comment: IComment) => comment.filmId === dataFilm.id);
-
-        const dataWithSimilar = {
-            ...dataFilm,
-            similar: getSimilarFilms(data, dataFilm),
-            comments: dataComments,
-        };
-
-        setCurrentFilm(dataWithSimilar);
+    const loadFilm = () => {
+        if (film && films && comments) {
+            const dataWithSimilar = {
+                ...film,
+                similar: similarFilms,
+                comments: comments,
+            };
+            setCurrentFilm(dataWithSimilar);
+        }
     };
 
     useEffect(() => {
-        let abortFetch: () => void;
-        fetchFilm(loadFilm).then((abort) => {
-            abortFetch = abort;
-        });
+        loadFilm();
+    }, [params, film, films, comments]);
 
-        return () => {
-            if (abortFetch) {
-                abortFetch();
-            }
-        };
-    }, [params]);
-
-    const handlerAddComment = (value: string) => {
-        if (value) {
-            const newComment = {
+    const handlerAddComment = async (value: string) => {
+        if (value && comments && currentFilm) {
+            const newComment: IComment = {
                 id: comments?.length,
                 filmId: currentFilm?.id,
                 user: userId,
                 text: value,
                 date: getDateNowToString(),
             };
-            setCurrentFilm((prev: IFilmPage) => ({
-                ...prev,
-                comments: [newComment, ...prev.comments],
-            }));
 
-            dispatch(addComment(newComment));
+            await createComment(newComment);
         }
     };
 
     const checkIsFavorite = (filmId: number) => {
-        return favoriteFilms.find((film: IFilm) => film.id === filmId);
+        return favoriteFilms?.find((film: IFilm) => film.id === filmId) ? true : false;
     };
 
     const checkIsWatchLater = (filmId: number) => {
-        return watchLaterFilms.find((film: IFilm) => film.id === filmId);
+        return watchLaterFilms?.find((film: IFilm) => film.id === filmId) ? true : false;
     };
 
-    const handlerAddFavorite = (filmId: number) => {
-        const film = films.find((film: IFilm) => film.id === filmId);
+    const handlerAddFavorite = async (filmId: number) => {
+        const film = films?.find((film: IFilm) => film.id === filmId);
         if (film) {
             if (checkIsFavorite(filmId)) {
-                dispatch(removeFavoriteFilm(film.id));
+                await deleteFavoriteFilm(film);
             } else {
-                dispatch(addFavoriteFilm(film));
+                await createFavoriteFilm(film);
             }
         }
     };
 
-    const handlerWatchLater = (filmId: number) => {
-        const film = films.find((film: IFilm) => film.id === filmId);
+    const handlerWatchLater = async (filmId: number) => {
+        const film = films?.find((film: IFilm) => film.id === filmId);
         if (film) {
             if (checkIsWatchLater(filmId)) {
-                dispatch(removeWatchLaterFilm(film.id));
+                await deleteWatchLaterFilm(film);
             } else {
-                dispatch(addWatchLaterFilm(film));
+                await createWatchLaterFilm(film);
             }
         }
     };
 
-    if (isLoadingFilm) {
+    if (isLoadingFilm || isLoadingF || isLoadingW) {
         return <Loader />;
     }
 
-    if (!currentFilm || fetchError) {
-        return <div>Фильм не найден: {fetchError}</div>;
+    if (!currentFilm || fetchError || errorF || errorW) {
+        return <div>Фильм не найден</div>;
     }
 
     return (

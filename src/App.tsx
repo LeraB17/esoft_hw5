@@ -2,8 +2,10 @@ import { FC } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import { Provider } from "react-redux";
-import store from "#store/store";
+import { setupStore } from "#store/store";
 import AppRouter from "./AppRouter";
+
+const store = setupStore();
 
 const App: FC = () => {
     return (
