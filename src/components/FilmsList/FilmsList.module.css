@@ -1,0 +1,14 @@
+.FilmsList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 10px;
+}
+.FilmsListTop {
+  display: flex;
+  justify-content: space-between;
+}
+.SortFilter {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}

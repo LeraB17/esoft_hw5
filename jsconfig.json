@@ -4,7 +4,12 @@
     "paths": {
       "#assets/*": ["assets/*"],
       "#components/*": ["components/*"],
-      "#pages/*": ["pages/*"]
+      "#pages/*": ["pages/*"],
+      "#utils/*": ["utils/*"],
+      "#router/*": ["router/*"],
+      "#layouts/*": ["layouts/*"],
+      "#store/*": ["store/*"],
+      "#hooks/*": ["hooks/*"],
     }
   }
 }

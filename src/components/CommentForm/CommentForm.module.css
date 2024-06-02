@@ -1,0 +1,11 @@
+.CommentForm {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.Form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
